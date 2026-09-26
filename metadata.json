@@ -1,0 +1,5 @@
+{
+  "name": "xAI Engage",
+  "description": "Source and manage engagement for posts on X.com via direct xAI API credentials, featuring Gemini intelligence for content generation.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  :root {
+    --background: #020203;
+    --foreground: #f8fafc;
+    
+    --card: #09090b;
+    --card-foreground: #f8fafc;
+    
+    --popover: #09090b;
+    --popover-foreground: #f8fafc;
+    
+    --primary: #f8fafc;
+    --primary-foreground: #020203;
+    
+    --secondary: #1e293b;
+    --secondary-foreground: #f8fafc;
+    
+    --muted: #0f172a;
+    --muted-foreground: #94a3b8;
+    
+    --accent: #334155;
+    --accent-foreground: #f8fafc;
+    
+    --destructive: #ef4444;
+    --destructive-foreground: #f8fafc;
+    
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: #334155;
+    
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-sans selection:bg-primary selection:text-primary-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-semibold;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/50 backdrop-blur-md border border-border/50;
+  }
+  
+  .text-small-caps {
+    @apply text-[10px] uppercase tracking-[0.15em] font-semibold opacity-60;
+  }
+  
+  .inner-shadow {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  }
+}

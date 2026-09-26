@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "xApiKey": { "type": "string", "description": "X.com API Key" },
+        "xaiApiKey": { "type": "string", "description": "xAI API Key" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "A post draft or published content",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published", "scheduled"] },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["content", "status", "createdAt"]
+    },
+    "Reply": {
+      "title": "Reply",
+      "description": "A generated reply to a tweet",
+      "type": "object",
+      "properties": {
+        "originalTweet": { "type": "string" },
+        "replyContent": { "type": "string" },
+        "style": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["originalTweet", "replyContent", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles"
+    },
+    "/users/{userId}/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "User posts"
+    },
+    "/users/{userId}/replies/{replyId}": {
+      "schema": { "$ref": "#/entities/Reply" },
+      "description": "User engagement history"
+    }
+  }
+}

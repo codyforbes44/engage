@@ -1,0 +1,130 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional)
+    //   - xApiKey: string (optional)
+    //   - xaiApiKey: string (optional)
+    //   - createdAt: timestamp (required, immutable)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: users/{userId}/posts
+    // Document ID: {postId}
+    // Fields:
+    //   - content: string (required)
+    //   - imageUrl: string (optional)
+    //   - status: string (required, 'draft' | 'published' | 'scheduled')
+    //   - createdAt: timestamp (required, immutable)
+    //   - updatedAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+    
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function isValidStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidOptionalStringLength(field, minLen, maxLen) {
+      return !(field in request.resource.data) || (
+        request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen
+      );
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser() {
+      return hasRequiredFields(['uid', 'email', 'createdAt']) &&
+             request.resource.data.uid is string &&
+             request.resource.data.email is string &&
+             request.resource.data.createdAt is timestamp &&
+             isValidOptionalStringLength('displayName', 0, 100) &&
+             isValidOptionalStringLength('photoURL', 0, 2000) &&
+             isValidOptionalStringLength('xApiKey', 0, 1000) &&
+             isValidOptionalStringLength('xaiApiKey', 0, 1000);
+    }
+
+    function isValidPost() {
+      return hasRequiredFields(['content', 'status', 'createdAt']) &&
+             isValidStringLength('content', 0, 25000) &&
+             request.resource.data.status in ['draft', 'published', 'scheduled'] &&
+             request.resource.data.createdAt is timestamp &&
+             isValidOptionalStringLength('imageUrl', 0, 2000);
+    }
+
+    function isValidReply() {
+      return hasRequiredFields(['originalTweet', 'replyContent', 'createdAt']) &&
+             isValidStringLength('originalTweet', 0, 5000) &&
+             isValidStringLength('replyContent', 0, 1000) &&
+             request.resource.data.createdAt is timestamp &&
+             isValidOptionalStringLength('style', 0, 100);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser() && uidUnchanged();
+      allow update: if isOwner(userId) && isValidUser() && uidNotModified() && 
+                    request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(userId);
+
+      match /posts/{postId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidPost();
+        allow update: if isOwner(userId) && isValidPost() &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /replies/{replyId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidReply();
+        allow update: if isOwner(userId) && isValidReply() &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
